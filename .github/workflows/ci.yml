@@ -26,3 +26,18 @@ jobs:
           tags: |
             sysbedlam1/testapp:${{ github.ref_name }}
             sysbedlam1/testapp:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SRV_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            helm upgrade --install testapp ~/helm/testapp \
+              --set image.tag=${{ github.ref_name }}
